@@ -18,9 +18,11 @@ jobs:
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v2
 
-      # 3. Installer Azure CLI (remplace l'ancienne action avec azure/cli-action)
-      - name: Set up Azure CLI
-        uses: azure/cli-action@v1  # Version mise à jour de l'action Azure CLI
+      # 3. Installer Azure CLI manuellement
+      - name: Install Azure CLI
+        run: |
+          curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+          az --version  # Vérifie l'installation d'Azure CLI
 
       # 4. Se connecter à Azure avec les secrets GitHub
       - name: Login to Azure
