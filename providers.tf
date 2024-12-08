@@ -1,6 +1,8 @@
 provider "azurerm" {
   features {}
+  skip_provider_registration = true  # Disable automatic provider registration
 }
+
 
 terraform {
   required_providers {
