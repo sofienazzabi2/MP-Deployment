@@ -6,7 +6,7 @@ resource "azurerm_resource_group" "aks_rg" {
 
 # Kubernetes Cluster
 resource "azurerm_kubernetes_cluster" "aks" {
-  name                = var.cluster_name # Update: Ensure this matches your cluster name
+  name                = var.cluster_name 
   kubernetes_version  = var.kubernetes_version # Update: Ensure this matches your desired Kubernetes version
   location            = var.location # Update: Ensure this matches your desired Azure region
   resource_group_name = azurerm_resource_group.aks_rg.name
