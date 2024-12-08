@@ -1,7 +1,7 @@
 # Resource Group
 resource "azurerm_resource_group" "aks_rg" {
   name     = var.resource_group_name # Update: Ensure this matches your resource group
-  location = var.location # Update: Ensure this matches your desired Azure region
+  location = var.location 
 }
 
 # Kubernetes Cluster
