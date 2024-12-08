@@ -15,7 +15,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
   default_node_pool {
     name                = "system" # Optional: Update the pool name if needed
     node_count          = var.system_node_count # Optional: Adjust node count based on load
-    vm_size             = "Standard_DS2_v2" # Optional: Change the VM size based on performance needs
+    vm_size             = "Standard_B2ms" # Optional: Change the VM size based on performance needs
     type                = "VirtualMachineScaleSets"
     zones               = [1, 2, 3] # Optional: Update based on the desired availability zones
     enable_auto_scaling = false # Optional: Enable autoscaling if required
