@@ -85,7 +85,7 @@ jobs:
       - name: Deploy to AKS with updated image
         run: |
           kubectl set image deployment/nodejs-app nodejs-app=sofienazzabi/nodejs-app:${GITHUB_RUN_NUMBER}
-          kubectl apply -f k8s.yml
+          kubectl apply -f k8s-deployment.yml
 
       # 10. Destroy Terraform resources (commented out)
       # - name: Destroy Terraform resources
