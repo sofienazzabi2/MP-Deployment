@@ -101,6 +101,6 @@ jobs:
           kubectl set image deployment/nodejs-app nodejs-app=sofienazzabi/nodejs-app:44
 
       # 13. Destroy Terraform resources (commented out)
-      - name: Destroy Terraform resources
-        run: |
-          terraform destroy -auto-approve
+      # - name: Destroy Terraform resources
+      #   run: |
+      #     terraform destroy -auto-approve
