@@ -106,6 +106,10 @@ jobs:
           # Display the access URL
           echo "Access the app at http://$EXTERNAL_IP:$NODE_PORT"
 
+      - name: List all deployments across all namespaces
+        run: |
+          kubectl get deployments --all-namespaces=true
+
 
       # 15. Destroy Terraform resources (commented out)
       # - name: Destroy Terraform resources
