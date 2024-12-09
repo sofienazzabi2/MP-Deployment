@@ -6,6 +6,34 @@ on:
       - main  # Trigger the pipeline on pushes to the main branch
 
 jobs:
+  terraform:
+    runs-on: ubuntu-latest  # Use an Ubuntu environment for the pipeline
+
+    steps:
+      # 1. Checkout the code from the repository
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # 2. Install Azure CLI manually
+      - name: Install Azure CLI
+        run: |
+          curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+          az --version  # Verify Azure CLI installation
+
+      # 3. Login to Azure using service principal credentials
+      - name: Login to Azure
+        run: |
+          az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
+          az account set --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      # 4. Initialize Terraform
+      - name: Terraform Init
+        run: terraform init
+
+      # 5. Apply Terraform configuration to provision infrastructure
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+
   build:
     runs-on: ubuntu-latest  # Use an Ubuntu environment for the pipeline
 
@@ -37,7 +65,7 @@ jobs:
         run: |
           echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
 
-      # 6. Tag Docker image
+      # 6. Tag Docker image with version number
       - name: Tag Docker image with auto-increment version
         run: |
           IMAGE_VERSION="${GITHUB_RUN_NUMBER}"
@@ -53,7 +81,7 @@ jobs:
         run: |
           az aks get-credentials --resource-group ${{ secrets.AKS_RESOURCE_GROUP }} --name ${{ secrets.AKS_CLUSTER_NAME }} --admin
 
-      # 9. Apply Kubernetes deployment YAML (updating for the new image)
+      # 9. Apply Kubernetes deployment YAML with the updated image
       - name: Deploy to AKS with updated image
         run: |
           kubectl set image deployment/nodejs-app nodejs-app=sofienazzabi/nodejs-app:${GITHUB_RUN_NUMBER}
