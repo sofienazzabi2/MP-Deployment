@@ -36,6 +36,7 @@ jobs:
 
   build:
     runs-on: ubuntu-latest  # Use an Ubuntu environment for the pipeline
+    needs: terraform  # This ensures the 'build' job waits for 'terraform' to finish
 
     steps:
       # 1. Checkout the code from the repository
