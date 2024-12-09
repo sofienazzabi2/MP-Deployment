@@ -3,37 +3,63 @@ name: Deploy AKS Cluster
 on:
   push:
     branches:
-      - main  # Déclenche le pipeline à chaque push sur la branche principale
+      - main  # Trigger the pipeline on pushes to the main branch
 
 jobs:
-  terraform:
-    runs-on: ubuntu-latest  # Utilise un environnement Ubuntu pour le pipeline
+  build:
+    runs-on: ubuntu-latest  # Use an Ubuntu environment for the pipeline
 
     steps:
-      # 1. Checkout le code du dépôt
+      # 1. Checkout the code from the repository
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # 2. Installer Terraform
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v2
+      # 2. Set up Node.js environment
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "22.3.0"
 
-      # 3. Installer Azure CLI manuellement
-      - name: Install Azure CLI
+      # 3. Install dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # 4. Build Docker image with version based on GITHUB_RUN_NUMBER
+      - name: Build Docker image
         run: |
-          curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-          az --version  # Vérifie l'installation d'Azure CLI
+          docker build -t sofienazzabi/nodejs-app:${GITHUB_RUN_NUMBER} .
 
-      # 4. Se connecter à Azure avec les secrets GitHub
-      - name: Login to Azure
+      # 5. Log in to Docker Hub
+      - name: Log in to Docker Hub
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: |
-          az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
-          az account set --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
 
-      # 5. Initialiser Terraform
-      - name: Terraform Init
-        run: terraform init
+      # 6. Tag Docker image
+      - name: Tag Docker image with auto-increment version
+        run: |
+          IMAGE_VERSION="${GITHUB_RUN_NUMBER}"
+          docker tag sofienazzabi/nodejs-app:${GITHUB_RUN_NUMBER} sofienazzabi/nodejs-app:${IMAGE_VERSION}
 
-      # 6. Appliquer la configuration Terraform pour créer le cluster
-      - name: Terraform Apply
-        run: terraform apply -auto-approve
+      # 7. Push Docker image to Docker Hub
+      - name: Push Docker image to Docker Hub
+        run: |
+          docker push sofienazzabi/nodejs-app:${GITHUB_RUN_NUMBER}
+
+      # 8. Get Kubeconfig to access AKS cluster
+      - name: Get Kubeconfig
+        run: |
+          az aks get-credentials --resource-group ${{ secrets.AKS_RESOURCE_GROUP }} --name ${{ secrets.AKS_CLUSTER_NAME }} --admin
+
+      # 9. Apply Kubernetes deployment YAML (updating for the new image)
+      - name: Deploy to AKS with updated image
+        run: |
+          kubectl set image deployment/nodejs-app nodejs-app=sofienazzabi/nodejs-app:${GITHUB_RUN_NUMBER}
+          kubectl apply -f k8s.yml
+
+      # 10. Destroy Terraform resources (commented out)
+      # - name: Destroy Terraform resources
+      #   run: |
+      #     terraform destroy -auto-approve
