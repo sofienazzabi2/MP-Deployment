@@ -3,43 +3,37 @@ name: Deploy AKS Cluster
 on:
   push:
     branches:
-      - main  # Trigger the pipeline on pushes to the main branch
+      - main  # Déclenche le pipeline à chaque push sur la branche principale
 
 jobs:
   terraform:
-    runs-on: ubuntu-latest  # Use an Ubuntu environment for the pipeline
+    runs-on: ubuntu-latest  # Utilise un environnement Ubuntu pour le pipeline
 
     steps:
-      # 1. Checkout repository code
+      # 1. Checkout le code du dépôt
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # 2. Set up Terraform
+      # 2. Installer Terraform
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v2
 
-      # 3. Install Azure CLI
+      # 3. Installer Azure CLI manuellement
       - name: Install Azure CLI
         run: |
           curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-          az --version  # Verify Azure CLI installation
+          az --version  # Vérifie l'installation d'Azure CLI
 
-      # 4. Login to Azure using GitHub Secrets
+      # 4. Se connecter à Azure avec les secrets GitHub
       - name: Login to Azure
         run: |
           az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
           az account set --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      # 5. Initialize Terraform
+      # 5. Initialiser Terraform
       - name: Terraform Init
         run: terraform init
 
-      # 6. Plan Terraform configuration
-      - name: Terraform Plan
-        run: terraform plan -out=tfplan
-
-      # 7. Apply Terraform configuration if there are changes
+      # 6. Appliquer la configuration Terraform pour créer le cluster
       - name: Terraform Apply
-        if: success() && steps.terraform-plan.outputs.changes == 'true'
         run: terraform apply -auto-approve
-
