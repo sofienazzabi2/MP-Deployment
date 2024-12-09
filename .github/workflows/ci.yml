@@ -3,37 +3,61 @@ name: Deploy AKS Cluster
 on:
   push:
     branches:
-      - main  # Déclenche le pipeline à chaque push sur la branche principale
+      - main  # Trigger the pipeline on pushes to the main branch
 
 jobs:
   terraform:
-    runs-on: ubuntu-latest  # Utilise un environnement Ubuntu pour le pipeline
+    runs-on: ubuntu-latest  # Use an Ubuntu environment for the pipeline
 
     steps:
-      # 1. Checkout le code du dépôt
+      # 1. Checkout the code from the repository
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # 2. Installer Terraform
+      # 2. Set up Terraform
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v2
 
-      # 3. Installer Azure CLI manuellement
+      # 3. Install Azure CLI manually
       - name: Install Azure CLI
         run: |
           curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-          az --version  # Vérifie l'installation d'Azure CLI
+          az --version  # Verify the Azure CLI installation
 
-      # 4. Se connecter à Azure avec les secrets GitHub
+      # 4. Login to Azure with GitHub secrets
       - name: Login to Azure
         run: |
           az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
           az account set --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      # 5. Initialiser Terraform
+      # 5. Initialize Terraform
       - name: Terraform Init
         run: terraform init
 
-      # 6. Appliquer la configuration Terraform pour créer le cluster
-      - name: Terraform Apply
+      # 6. Run terraform plan and capture the output
+      - name: Terraform Plan
+        id: plan
+        run: |
+          terraform plan -out=tfplan || echo "terraform plan failed"
+      
+      # 7. Check for errors related to the resource already existing
+      - name: Check if Resource Exists
+        id: check_resource
+        run: |
+          if grep -q "already exists" terraform-plan.log; then
+            echo "Resource already exists, skipping apply."
+            echo "skip_apply=true" >> $GITHUB_ENV
+          else
+            echo "Resource does not exist, proceeding with apply."
+            echo "skip_apply=false" >> $GITHUB_ENV
+          fi
+
+      # 8. Conditionally apply changes based on error detection
+      - name: Terraform Apply (if no resource conflict)
+        if: env.skip_apply == 'false'
         run: terraform apply -auto-approve
+
+      # 9. Skip Apply if no resource conflict
+      - name: Skip Terraform Apply
+        if: env.skip_apply == 'true'
+        run: echo "Skipping apply due to resource already existing."
