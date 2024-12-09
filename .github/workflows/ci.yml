@@ -95,18 +95,16 @@ jobs:
         run: |
           kubectl apply -f ./k8s-deployment.yaml # Ensure the deployment is created first
 
-      # 12. Set the image to the newly built version
-      - name: Set image for deployment
+      - name: Output NodePort and External IP
         run: |
-          kubectl set image deployment/nodejs-app nodejs-app=sofienazzabi/nodejs-app:44
-
-      # 13. Get NodePort
-      - name: Get NodePort
-        run: |
-          # Get the NodePort assigned to your service
+          # Get the NodePort
           NODE_PORT=$(kubectl get svc nodejs-app -o jsonpath='{.spec.ports[0].nodePort}')
-          echo "NodePort: $NODE_PORT"
-          echo "External IP: $EXTERNAL_IP"
+          
+          # Get the external IP of the AKS cluster
+          EXTERNAL_IP=$(az aks show --resource-group ${{ secrets.AKS_RESOURCE_GROUP }} --name ${{ secrets.AKS_CLUSTER_NAME }} --query "fqdn" -o tsv)
+  
+          # Display the access URL
+          echo "Access the app at http://$EXTERNAL_IP:$NODE_PORT"
 
 
       # 15. Destroy Terraform resources (commented out)
