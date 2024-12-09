@@ -1,0 +1,55 @@
+name: Deploy AKS Cluster
+
+on:
+  push:
+    branches:
+      - main  # Trigger the pipeline on pushes to the main branch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # Use an Ubuntu environment for the pipeline
+
+    steps:
+      # 1. Checkout the code from the repository
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # 2. Set up Node.js environment
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "22.3.0"
+
+      # 3. Install dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # 4. Build Docker image with version based on GITHUB_RUN_NUMBER
+      - name: Build Docker image
+        run: |
+          docker build -t sofienazzabi/nodejs-app:${GITHUB_RUN_NUMBER} .
+
+      # 5. Log in to Docker Hub
+      - name: Log in to Docker Hub
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: |
+          echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
+
+      # 6. Tag Docker image
+      - name: Tag Docker image with auto-increment version
+        run: |
+          IMAGE_VERSION="${GITHUB_RUN_NUMBER}"
+          docker tag sofienazzabi/nodejs-app:${GITHUB_RUN_NUMBER} sofienazzabi/nodejs-app:${IMAGE_VERSION}
+
+      # 7. Push Docker image to Docker Hub
+      - name: Push Docker image to Docker Hub
+        run: |
+          docker push sofienazzabi/nodejs-app:${GITHUB_RUN_NUMBER}
+
+      # 8. Apply Kubernetes deployment YAML (updating for the new image)
+      - name: Deploy to AKS with updated image
+        run: |
+          kubectl set image deployment/nodejs-app nodejs-app=sofienazzabi/nodejs-app:${GITHUB_RUN_NUMBER}
+          kubectl apply -f k8s.yml
