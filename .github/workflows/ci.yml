@@ -106,6 +106,12 @@ jobs:
           # Display the access URL
           echo "Access the app at http://$EXTERNAL_IP:$NODE_PORT"
 
+      # 8. Get all services in all namespaces
+      - name: List all services across all namespaces
+        run: |
+          kubectl get svc --all-namespaces=true
+  
+      # 9. Get all deployments in all namespaces
       - name: List all deployments across all namespaces
         run: |
           kubectl get deployments --all-namespaces=true
