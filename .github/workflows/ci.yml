@@ -51,39 +51,39 @@ jobs:
         run: |
           az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
           az account set --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      # # 4. Set up Node.js environment
-      # - name: Set up Node.js
-      #   uses: actions/setup-node@v2
-      #   with:
-      #     node-version: "22.3.0"
+      # 4. Set up Node.js environment
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "22.3.0"
 
-      # # 5. Install dependencies
-      # - name: Install dependencies
-      #   run: npm install
+      # 5. Install dependencies
+      - name: Install dependencies
+        run: npm install
 
-      # # 6. Build Docker image with version based on GITHUB_RUN_NUMBER
-      # - name: Build Docker image
-      #   run: |
-      #     docker build -t sofienazzabi/nodejs-app:${GITHUB_RUN_NUMBER} .
+      # 6. Build Docker image with version based on GITHUB_RUN_NUMBER
+      - name: Build Docker image
+        run: |
+          docker build -t sofienazzabi/nodejs-app:${GITHUB_RUN_NUMBER} .
 
-      # # 7. Log in to Docker Hub
-      # - name: Log in to Docker Hub
-      #   env:
-      #     DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      #     DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-      #   run: |
-      #     echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
+      # 7. Log in to Docker Hub
+      - name: Log in to Docker Hub
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: |
+          echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
 
-      # # 8. Tag Docker image with auto-increment version
-      # - name: Tag Docker image with auto-increment version
-      #   run: |
-      #     IMAGE_VERSION="${GITHUB_RUN_NUMBER}"
-      #     docker tag sofienazzabi/nodejs-app:${GITHUB_RUN_NUMBER} sofienazzabi/nodejs-app:${IMAGE_VERSION}
+      # 8. Tag Docker image with auto-increment version
+      - name: Tag Docker image with auto-increment version
+        run: |
+          IMAGE_VERSION="${GITHUB_RUN_NUMBER}"
+          docker tag sofienazzabi/nodejs-app:${GITHUB_RUN_NUMBER} sofienazzabi/nodejs-app:${IMAGE_VERSION}
 
-      # # 9. Push Docker image to Docker Hub
-      # - name: Push Docker image to Docker Hub
-      #   run: |
-      #     docker push sofienazzabi/nodejs-app:${GITHUB_RUN_NUMBER}
+      # 9. Push Docker image to Docker Hub
+      - name: Push Docker image to Docker Hub
+        run: |
+          docker push sofienazzabi/nodejs-app:${GITHUB_RUN_NUMBER}
 
       # 10. Get Kubeconfig to access AKS cluster
       - name: Get Kubeconfig
