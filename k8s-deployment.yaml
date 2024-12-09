@@ -28,7 +28,6 @@ spec:
     app: nodejs-app
   ports:
     - protocol: TCP
-      port: 80
-      targetPort: 4000
-      nodePort: 30001  # Expose on port 30001 of every node
-  type: NodePort  # Use NodePort for external access
+      port: 80  # Expose service on port 80
+      targetPort: 4000  # Forward to the container's exposed port
+  type: LoadBalancer  # Use LoadBalancer for external access
