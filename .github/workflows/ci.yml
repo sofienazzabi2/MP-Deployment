@@ -100,7 +100,19 @@ jobs:
         run: |
           kubectl set image deployment/nodejs-app nodejs-app=sofienazzabi/nodejs-app:44
 
-      # 13. Destroy Terraform resources (commented out)
+      # 13. Get NodePort
+      - name: Get NodePort
+        run: |
+          # Get the NodePort assigned to your service
+          NODE_PORT=$(kubectl get svc nodejs-app -o jsonpath='{.spec.ports[0].nodePort}')
+          echo "NodePort: $NODE_PORT"
+
+      # 14. Display the access URL
+      - name: Display Access URL
+        run: |
+          echo "Access the app at http://$EXTERNAL_IP:$NODE_PORT"
+
+      # 15. Destroy Terraform resources (commented out)
       # - name: Destroy Terraform resources
       #   run: |
       #     terraform destroy -auto-approve
