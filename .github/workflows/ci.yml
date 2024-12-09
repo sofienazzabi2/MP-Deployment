@@ -103,4 +103,4 @@ jobs:
       # 12. Destroy Terraform resources (commented out)
       - name: Destroy Terraform resources
         run: |
-          terraform destroy -auto-approveauto-approve
+          terraform destroy -auto-approve
