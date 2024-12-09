@@ -93,7 +93,7 @@ jobs:
       # 11. Apply Kubernetes deployment
       - name: Apply Kubernetes deployment
         run: |
-          kubectl apply -f ./k8s-deployment.yml  # Ensure the deployment is created first
+          kubectl apply -f ./k8s-deployment.yaml # Ensure the deployment is created first
 
       # 12. Set the image to the newly built version
       - name: Set image for deployment
