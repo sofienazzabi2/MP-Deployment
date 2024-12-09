@@ -13,7 +13,7 @@ RUN npm install
 # Copy the rest of your application code to the container
 COPY . .
 
-# Expose the port the app runs on
+# Expose the port the app runs on (make sure this matches the Kubernetes Service)
 EXPOSE 4000
 
 # Command to run your app
