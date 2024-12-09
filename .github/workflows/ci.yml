@@ -3,7 +3,7 @@ name: Deploy AKS Cluster
 on:
   push:
     branches:
-      - main  # Trigger the pipeline on pushes to the main branch
+      - main 
 
 jobs:
   terraform:
