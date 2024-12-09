@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: nodejs-app
-        image: sofienazzabi/nodejs-app:44  # Using the auto-increment version
+        image: sofienazzabi/nodejs-app:57  # Using the auto-increment version
         ports:
         - containerPort: 4000  # Match the exposed port from Dockerfile
 
