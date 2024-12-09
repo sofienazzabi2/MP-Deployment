@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest  # Use an Ubuntu environment for the pipeline
 
     steps:
-      # 1. Checkout the code from the repository
+      # 1. Checkout the code from the repository.
       - name: Checkout code
         uses: actions/checkout@v2
 
