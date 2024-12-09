@@ -43,22 +43,34 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # 2. Set up Node.js environment
+      # 2. Install Azure CLI again in this job
+      - name: Install Azure CLI
+        run: |
+          curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+          az --version  # Verify Azure CLI installation
+
+      # 3. Login to Azure using service principal credentials again
+      - name: Login to Azure
+        run: |
+          az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
+          az account set --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      # 4. Set up Node.js environment
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
           node-version: "22.3.0"
 
-      # 3. Install dependencies
+      # 5. Install dependencies
       - name: Install dependencies
         run: npm install
 
-      # 4. Build Docker image with version based on GITHUB_RUN_NUMBER
+      # 6. Build Docker image with version based on GITHUB_RUN_NUMBER
       - name: Build Docker image
         run: |
           docker build -t sofienazzabi/nodejs-app:${GITHUB_RUN_NUMBER} .
 
-      # 5. Log in to Docker Hub
+      # 7. Log in to Docker Hub
       - name: Log in to Docker Hub
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -66,29 +78,29 @@ jobs:
         run: |
           echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
 
-      # 6. Tag Docker image with version number
+      # 8. Tag Docker image with auto-increment version
       - name: Tag Docker image with auto-increment version
         run: |
           IMAGE_VERSION="${GITHUB_RUN_NUMBER}"
           docker tag sofienazzabi/nodejs-app:${GITHUB_RUN_NUMBER} sofienazzabi/nodejs-app:${IMAGE_VERSION}
 
-      # 7. Push Docker image to Docker Hub
+      # 9. Push Docker image to Docker Hub
       - name: Push Docker image to Docker Hub
         run: |
           docker push sofienazzabi/nodejs-app:${GITHUB_RUN_NUMBER}
 
-      # 8. Get Kubeconfig to access AKS cluster
+      # 10. Get Kubeconfig to access AKS cluster
       - name: Get Kubeconfig
         run: |
           az aks get-credentials --resource-group ${{ secrets.AKS_RESOURCE_GROUP }} --name ${{ secrets.AKS_CLUSTER_NAME }} --admin
 
-      # 9. Apply Kubernetes deployment YAML with the updated image
+      # 11. Deploy to AKS with updated image
       - name: Deploy to AKS with updated image
         run: |
           kubectl set image deployment/nodejs-app nodejs-app=sofienazzabi/nodejs-app:${GITHUB_RUN_NUMBER}
           kubectl apply -f k8s-deployment.yml
 
-      # 10. Destroy Terraform resources (commented out)
+      # 12. Destroy Terraform resources (commented out)
       - name: Destroy Terraform resources
         run: |
-          terraform destroy -auto-approve
+          terraform destroy -auto-approveauto-approve
