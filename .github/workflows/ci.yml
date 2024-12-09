@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest  # Use an Ubuntu environment for the pipeline
 
     steps:
-      # 1. Checkout the code from the repository.
+      # 1. Checkout the code from the repository
       - name: Checkout code
         uses: actions/checkout@v2
 
@@ -89,6 +89,6 @@ jobs:
           kubectl apply -f k8s-deployment.yml
 
       # 10. Destroy Terraform resources (commented out)
-      # - name: Destroy Terraform resources
-      #   run: |
-      #     terraform destroy -auto-approve
+      - name: Destroy Terraform resources
+        run: |
+          terraform destroy -auto-approve
