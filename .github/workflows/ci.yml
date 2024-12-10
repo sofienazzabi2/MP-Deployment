@@ -100,6 +100,11 @@ jobs:
         run: |
           kubectl apply -f ./k8s-deployment.yaml
 
+      # 11. Apply Kubernetes deployment
+      - name: Apply Kubernetes deployment
+        run: |
+          kubectl apply -f ./argoCD-loadbalancer.yaml
+
       # 8. Get all services in all namespaces
       - name: List all services across all namespaces
         run: |
