@@ -90,21 +90,15 @@ jobs:
         run: |
           az aks get-credentials --resource-group ${{ secrets.AKS_RESOURCE_GROUP }} --name ${{ secrets.AKS_CLUSTER_NAME }} --admin
 
+      # 5. Create ArgoCD Namespace and Install ArgoCD
+      - name: Install ArgoCD
+        run: |
+          kubectl create namespace argocd
+          kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/v2.13.1/manifests/install.yaml
       # 11. Apply Kubernetes deployment
       - name: Apply Kubernetes deployment
         run: |
           kubectl apply -f ./k8s-deployment.yaml
-
-      - name: Output NodePort and External IP
-        run: |
-          # Get the NodePort
-          NODE_PORT=$(kubectl get svc nodejs-app -o jsonpath='{.spec.ports[0].nodePort}')
-          
-          # Get the external IP of the AKS cluster
-          EXTERNAL_IP=$(az aks show --resource-group ${{ secrets.AKS_RESOURCE_GROUP }} --name ${{ secrets.AKS_CLUSTER_NAME }} --query "fqdn" -o tsv)
-  
-          # Display the access URL
-          echo "Access the app at http://$EXTERNAL_IP:$NODE_PORT"
 
       # 8. Get all services in all namespaces
       - name: List all services across all namespaces
@@ -115,6 +109,8 @@ jobs:
       - name: List all deployments across all namespaces
         run: |
           kubectl get deployments --all-namespaces=true
+
+
 
 
       # 15. Destroy Terraform resources (commented out)
