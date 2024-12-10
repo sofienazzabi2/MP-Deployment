@@ -6,31 +6,31 @@ on:
       - main 
 
 jobs:
-  # terraform:
-  #   runs-on: ubuntu-latest  
+  terraform:
+    runs-on: ubuntu-latest  
 
-  #   steps:
+    steps:
       
-  #     - name: Checkout code
-  #       uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-  #     # 2. Install Azure CLI manually
-  #     - name: Install Azure CLI
-  #       run: |
-  #         curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-  #         az --version  # Verify Azure CLI installation
-  #     # 3. Login to Azure using service principal credentials
-  #     - name: Login to Azure
-  #       run: |
-  #         az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
-  #         az account set --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-  #     # 4. Initialize Terraform
-  #     - name: Terraform Init
-  #       run: terraform init
+      # 2. Install Azure CLI manually
+      - name: Install Azure CLI
+        run: |
+          curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+          az --version  # Verify Azure CLI installation
+      # 3. Login to Azure using service principal credentials
+      - name: Login to Azure
+        run: |
+          az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
+          az account set --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      # 4. Initialize Terraform
+      - name: Terraform Init
+        run: terraform init
 
-  #     # 5. Apply Terraform configuration to provision infrastructure
-  #     - name: Terraform Apply
-  #       run: terraform apply -auto-approve
+      # 5. Apply Terraform configuration to provision infrastructure
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
 
   build:
     runs-on: ubuntu-latest  
@@ -93,7 +93,7 @@ jobs:
       # 5. Create ArgoCD Namespace and Install ArgoCD
       - name: Install ArgoCD
         run: |
-          # kubectl create namespace argocd
+          kubectl create namespace argocd
           kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/v2.13.1/manifests/install.yaml
       # 11. Apply Kubernetes deployment
       - name: Apply Kubernetes deployment
