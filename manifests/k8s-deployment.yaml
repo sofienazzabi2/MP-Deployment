@@ -21,16 +21,4 @@ spec:
         ports:
         - containerPort: 4000  # Match the exposed port from Dockerfile
 
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: nodejs-app
-spec:
-  selector:
-    app: nodejs-app
-  ports:
-    - protocol: TCP
-      port: 80  # Expose service on port 80
-      targetPort: 4000  # Forward to the container's exposed port
-  type: LoadBalancer  # Use LoadBalancer for external access
+
