@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: nodejs-app
-        image: sofienazzabi/nodejs-app:57  # Using the auto-increment version
+        image: sofienazzabi/nodejs-app:44  # Using the auto-increment version
         ports:
         - containerPort: 4000  # Match the exposed port from Dockerfile
 
@@ -34,48 +34,3 @@ spec:
       port: 80  # Expose service on port 80
       targetPort: 4000  # Forward to the container's exposed port
   type: LoadBalancer  # Use LoadBalancer for external access
----
-# ArgoCD Server Deployment
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: argocd-server
-  labels:
-    app.kubernetes.io/name: argocd-server
-    app.kubernetes.io/part-of: argocd
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: argocd-server
-  template:
-    metadata:
-      labels:
-        app.kubernetes.io/name: argocd-server
-    spec:
-      containers:
-      - name: argocd-server
-        image: argoproj/argocd:v2.8.0 # Update version as needed
-        ports:
-        - containerPort: 8080
-        - containerPort: 443
----
-# ArgoCD Server Service (LoadBalancer)
-apiVersion: v1
-kind: Service
-metadata:
-  name: argocd-server
-  labels:
-    app.kubernetes.io/name: argocd-server
-    app.kubernetes.io/part-of: argocd
-spec:
-  selector:
-    app.kubernetes.io/name: argocd-server
-  ports:
-    - name: http
-      port: 80
-      targetPort: 8080
-    - name: https
-      port: 443
-      targetPort: 443
-  type: LoadBalancer # Expose externally
